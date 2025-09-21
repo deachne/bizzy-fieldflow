@@ -53,6 +53,14 @@ export function useAIProcessor() {
       existingInboxItems.unshift(inboxItem);
       localStorage.setItem('inbox_items', JSON.stringify(existingInboxItems));
 
+      // Extract and save tasks to Knowledge Hub
+      const extractedTasks = extractTasks(cleanedContent, cleanedTitle);
+      if (extractedTasks.length > 0) {
+        const existingKnowledgeItems = JSON.parse(localStorage.getItem('knowledge_items') || '[]');
+        const newKnowledgeItems = [...existingKnowledgeItems, ...extractedTasks];
+        localStorage.setItem('knowledge_items', JSON.stringify(newKnowledgeItems));
+      }
+
       return processedNote;
     } finally {
       setIsProcessing(false);
@@ -152,4 +160,72 @@ function generateSuggestedActions(content: string, tags: string[]): string[] {
   actions.add('Archive');
 
   return Array.from(actions).slice(0, 4); // Limit to 4 actions
+}
+
+// Extract Tasks from Content
+function extractTasks(content: string, noteTitle: string): any[] {
+  const tasks = [];
+  const lines = content.split('\n');
+  
+  // Look for task patterns: - [ ], - [x], TODO:, TASK:, etc.
+  const taskPatterns = [
+    /^[\s]*[-*]\s*\[\s*\]\s*(.+)$/gim, // - [ ] task
+    /^[\s]*[-*]\s*\[x\]\s*(.+)$/gim,   // - [x] completed task  
+    /^[\s]*(?:TODO|TASK|Action|Fix|Repair):\s*(.+)$/gim, // TODO: task
+    /(?:need to|should|must|have to|remember to)\s+(.+?)(?:\.|$)/gi, // natural language tasks
+  ];
+
+  let taskId = Date.now();
+  
+  taskPatterns.forEach((pattern, patternIndex) => {
+    let match;
+    while ((match = pattern.exec(content)) !== null) {
+      const taskText = match[1]?.trim();
+      if (taskText && taskText.length > 3) {
+        const isCompleted = patternIndex === 1; // [x] pattern
+        
+        tasks.push({
+          id: taskId++,
+          type: 'task',
+          title: taskText.length > 60 ? taskText.substring(0, 60) + '...' : taskText,
+          content: `Task extracted from note: "${noteTitle}"\n\n${taskText}`,
+          tags: ['task', 'extracted', ...extractTaskTags(taskText)],
+          date: new Date().toLocaleDateString('en-US', { 
+            year: 'numeric', 
+            month: 'short', 
+            day: 'numeric' 
+          }),
+          module: 'Hub',
+          status: isCompleted ? 'completed' : 'pending',
+          sourceNote: noteTitle
+        });
+      }
+    }
+  });
+
+  return tasks;
+}
+
+// Extract task-specific tags
+function extractTaskTags(taskText: string): string[] {
+  const tags = [];
+  const lowerText = taskText.toLowerCase();
+  
+  const taskTagMappings = [
+    { keywords: ['fix', 'repair', 'broken', 'maintenance'], tag: 'maintenance' },
+    { keywords: ['buy', 'purchase', 'order', 'get'], tag: 'procurement' },
+    { keywords: ['call', 'contact', 'phone', 'email'], tag: 'communication' },
+    { keywords: ['plant', 'seed', 'harvest', 'crop'], tag: 'farming' },
+    { keywords: ['equipment', 'tractor', 'combine', 'machinery'], tag: 'equipment' },
+    { keywords: ['urgent', 'asap', 'important', 'critical'], tag: 'priority' },
+    { keywords: ['meeting', 'schedule', 'appointment'], tag: 'calendar' },
+  ];
+  
+  taskTagMappings.forEach(({ keywords, tag }) => {
+    if (keywords.some(keyword => lowerText.includes(keyword))) {
+      tags.push(tag);
+    }
+  });
+  
+  return tags.slice(0, 3); // Limit task tags
 }

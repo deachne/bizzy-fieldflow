@@ -1,12 +1,12 @@
-import { useState } from "react";
-import { Search, FileText, Image, Mic, Globe, BookOpen, Calendar, Tag, Filter, Grid, List } from "lucide-react";
+import { useState, useEffect } from "react";
+import { Search, FileText, Image, Mic, Globe, BookOpen, Calendar, Tag, Filter, Grid, List, CheckSquare } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
-const knowledgeItems = [
+const defaultKnowledgeItems = [
   {
     id: 1,
     type: "journal",
@@ -69,14 +69,37 @@ const knowledgeItems = [
   },
 ];
 
-const allTags = Array.from(new Set(knowledgeItems.flatMap(item => item.tags)));
 const modules = ["All", "Hub", "Farmer", "Trader", "Library"];
+const typeFilters = ["All", "journal", "report", "webclip", "photo", "voice", "reference", "task"];
 
 export default function KnowledgeHub() {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedModule, setSelectedModule] = useState("All");
+  const [selectedType, setSelectedType] = useState("All");
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
+  const [knowledgeItems, setKnowledgeItems] = useState(defaultKnowledgeItems);
+
+  // Load knowledge items from localStorage
+  useEffect(() => {
+    const stored = localStorage.getItem('knowledge_items');
+    if (stored) {
+      const storedItems = JSON.parse(stored);
+      // Merge with default items, removing duplicates by id
+      const mergedItems = [...defaultKnowledgeItems];
+      storedItems.forEach((item: any) => {
+        if (!mergedItems.find(existing => existing.id === item.id)) {
+          mergedItems.push({
+            ...item,
+            icon: item.type === 'task' ? CheckSquare : FileText
+          });
+        }
+      });
+      setKnowledgeItems(mergedItems);
+    }
+  }, []);
+
+  const allTags = Array.from(new Set(knowledgeItems.flatMap(item => item.tags)));
 
   const filteredItems = knowledgeItems.filter(item => {
     const matchesSearch = item.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -84,11 +107,12 @@ export default function KnowledgeHub() {
                          item.tags.some(tag => tag.toLowerCase().includes(searchQuery.toLowerCase()));
     
     const matchesModule = selectedModule === "All" || item.module === selectedModule;
+    const matchesType = selectedType === "All" || item.type === selectedType;
     
     const matchesTags = selectedTags.length === 0 || 
                        selectedTags.some(tag => item.tags.includes(tag));
     
-    return matchesSearch && matchesModule && matchesTags;
+    return matchesSearch && matchesModule && matchesType && matchesTags;
   });
 
   const toggleTag = (tag: string) => {
@@ -158,6 +182,30 @@ export default function KnowledgeHub() {
                   </div>
                 </div>
 
+                {/* Type Filter */}
+                <div className="flex items-center gap-2">
+                  <span className="text-sm font-medium">Type:</span>
+                  <div className="flex gap-1">
+                    {typeFilters.map((type) => (
+                      <Button
+                        key={type}
+                        variant={selectedType === type ? "default" : "outline"}
+                        size="sm"
+                        onClick={() => setSelectedType(type)}
+                      >
+                        {type === "task" ? (
+                          <div className="flex items-center gap-1">
+                            <CheckSquare className="w-3 h-3" />
+                            Tasks
+                          </div>
+                        ) : (
+                          type
+                        )}
+                      </Button>
+                    ))}
+                  </div>
+                </div>
+
                 {/* View Toggle */}
                 <div className="flex items-center gap-1 ml-auto">
                   <Button
@@ -204,7 +252,7 @@ export default function KnowledgeHub() {
             </div>
 
             {/* Active Filters */}
-            {(selectedTags.length > 0 || selectedModule !== "All") && (
+            {(selectedTags.length > 0 || selectedModule !== "All" || selectedType !== "All") && (
               <div className="flex items-center gap-2 pt-2 border-t">
                 <span className="text-sm font-medium">Active filters:</span>
                 {selectedModule !== "All" && (
@@ -213,6 +261,17 @@ export default function KnowledgeHub() {
                     <button
                       className="ml-1 hover:bg-muted rounded"
                       onClick={() => setSelectedModule("All")}
+                    >
+                      ×
+                    </button>
+                  </Badge>
+                )}
+                {selectedType !== "All" && (
+                  <Badge variant="secondary">
+                    Type: {selectedType}
+                    <button
+                      className="ml-1 hover:bg-muted rounded"
+                      onClick={() => setSelectedType("All")}
                     >
                       ×
                     </button>
