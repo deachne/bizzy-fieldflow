@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Mic, Camera, Mail, Globe, FileText, Calendar, Filter, List, Grid } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -8,7 +8,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 const filterOptions = ["Today", "This Week", "This Month", "All"];
 const typeFilters = ["Voice", "Photo", "Email", "Web clip", "Note"];
 
-const inboxItems = [
+const defaultInboxItems = [
   {
     id: 1,
     type: "voice",
@@ -67,9 +67,23 @@ const inboxItems = [
 ];
 
 export default function Inbox() {
+  const [inboxItems, setInboxItems] = useState(defaultInboxItems);
   const [selectedFilter, setSelectedFilter] = useState("All");
   const [selectedType, setSelectedType] = useState("All");
   const [viewMode, setViewMode] = useState<"list" | "calendar">("list");
+
+  // Load inbox items from localStorage on mount
+  useEffect(() => {
+    const savedItems = localStorage.getItem('inbox_items');
+    if (savedItems) {
+      try {
+        const parsed = JSON.parse(savedItems);
+        setInboxItems([...parsed, ...defaultInboxItems]);
+      } catch (error) {
+        console.error('Failed to parse inbox items:', error);
+      }
+    }
+  }, []);
 
   const filteredItems = inboxItems.filter(item => {
     if (selectedFilter === "Today" && item.date !== "2024-10-16") return false;

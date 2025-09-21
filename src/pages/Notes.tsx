@@ -4,8 +4,10 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { MarkdownEditor } from '@/components/MarkdownEditor';
-import { Plus, Search, FileText, Calendar, Tag, Trash2 } from 'lucide-react';
+import { Plus, Search, FileText, Calendar, Tag, Trash2, Sparkles } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
+import { useAIProcessor } from '@/hooks/useAIProcessor';
+import { toast } from 'sonner';
 
 interface Note {
   id: string;
@@ -20,6 +22,7 @@ export default function Notes() {
   const [selectedNote, setSelectedNote] = useState<Note | null>(null);
   const [isEditing, setIsEditing] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const { processNote, isProcessing } = useAIProcessor();
 
   // Load notes from localStorage on mount
   useEffect(() => {
@@ -103,6 +106,18 @@ export default function Notes() {
     if (selectedNote?.id === noteId) {
       setSelectedNote(null);
       setIsEditing(false);
+    }
+  };
+
+  const handleProcessWithAI = async () => {
+    if (!selectedNote) return;
+    
+    try {
+      toast.loading('AI is processing your note...', { id: 'ai-process' });
+      await processNote(selectedNote.content, selectedNote.title);
+      toast.success('Note processed and sent to inbox!', { id: 'ai-process' });
+    } catch (error) {
+      toast.error('Failed to process note', { id: 'ai-process' });
     }
   };
 
@@ -235,9 +250,20 @@ export default function Notes() {
                   Last modified {formatDistanceToNow(selectedNote.timestamp, { addSuffix: true })}
                 </p>
               </div>
-              <Button onClick={() => setIsEditing(true)}>
-                Edit Note
-              </Button>
+              <div className="flex gap-2">
+                <Button 
+                  onClick={handleProcessWithAI}
+                  disabled={isProcessing}
+                  variant="outline"
+                  className="gap-2"
+                >
+                  <Sparkles className="w-4 h-4" />
+                  {isProcessing ? 'Processing...' : 'AI Process & Send'}
+                </Button>
+                <Button onClick={() => setIsEditing(true)}>
+                  Edit Note
+                </Button>
+              </div>
             </div>
 
             {/* Content */}
