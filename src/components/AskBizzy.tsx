@@ -5,6 +5,8 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
+import { useNavigate } from 'react-router-dom';
+import { InlineAnswerModal } from './InlineAnswerModal';
 
 interface AskBizzyProps {
   className?: string;
@@ -17,7 +19,9 @@ export function AskBizzy({ className = "" }: AskBizzyProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [apiKey, setApiKey] = useState('');
   const [showApiKeyInput, setShowApiKeyInput] = useState(false);
+  const [showInlineModal, setShowInlineModal] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
+  const navigate = useNavigate();
 
   const bizzySuggestions = [
     {
@@ -60,6 +64,19 @@ export function AskBizzy({ className = "" }: AskBizzyProps) {
     }
   }, [isExpanded]);
 
+  // Detect if query requires creation (Forge) or quick answer (inline)
+  const requiresForge = (query: string): boolean => {
+    const creationKeywords = [
+      'create', 'build', 'generate', 'make', 'design', 'plan', 'report', 'table', 
+      'chart', 'analysis', 'recommendation', 'forecast', 'calculate', 'compare',
+      'budget', 'schedule', 'optimize', 'project', 'app', 'tool'
+    ];
+    
+    return creationKeywords.some(keyword => 
+      query.toLowerCase().includes(keyword)
+    );
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!query.trim()) return;
@@ -71,6 +88,15 @@ export function AskBizzy({ className = "" }: AskBizzyProps) {
       return;
     }
 
+    // Route to Forge if creation is needed
+    if (requiresForge(query)) {
+      navigate('/forge?query=' + encodeURIComponent(query));
+      setIsExpanded(false);
+      setQuery('');
+      return;
+    }
+
+    // Handle quick answers inline
     setIsLoading(true);
     setResponse('');
 
@@ -86,7 +112,7 @@ export function AskBizzy({ className = "" }: AskBizzyProps) {
           messages: [
             {
               role: 'system',
-              content: 'You are Bizzy, an AI assistant specialized in farm management. Provide helpful, practical advice for farmers. Be concise and actionable. Focus on agricultural best practices, equipment maintenance, crop management, weather considerations, and farm operations.'
+              content: 'You are Bizzy, an AI assistant specialized in farm management. Provide helpful, practical advice for farmers. Be very concise for quick facts, status updates, and weather queries. Focus on direct answers.'
             },
             {
               role: 'user',
@@ -95,7 +121,7 @@ export function AskBizzy({ className = "" }: AskBizzyProps) {
           ],
           temperature: 0.2,
           top_p: 0.9,
-          max_tokens: 500,
+          max_tokens: 300,
           return_images: false,
           return_related_questions: false,
           frequency_penalty: 1,
@@ -108,7 +134,10 @@ export function AskBizzy({ className = "" }: AskBizzyProps) {
       }
 
       const data = await response.json();
-      setResponse(data.choices[0]?.message?.content || 'No response received');
+      const answer = data.choices[0]?.message?.content || 'No response received';
+      setResponse(answer);
+      setShowInlineModal(true);
+      setIsExpanded(false);
       
       // Store the response in inbox for later reference
       const existingInboxItems = JSON.parse(localStorage.getItem('inbox_items') || '[]');
@@ -116,7 +145,7 @@ export function AskBizzy({ className = "" }: AskBizzyProps) {
         id: Date.now(),
         type: 'ai-query',
         title: `Ask Bizzy: ${query.substring(0, 50)}${query.length > 50 ? '...' : ''}`,
-        content: data.choices[0]?.message?.content || 'No response received',
+        content: answer,
         timestamp: new Date().toLocaleString(),
         date: new Date().toISOString().split('T')[0],
         tags: ['ai-assistant', 'query'],
@@ -131,17 +160,17 @@ export function AskBizzy({ className = "" }: AskBizzyProps) {
       console.error('Error calling Perplexity API:', error);
       toast.error('Failed to get response from Bizzy. Please check your API key.');
       setResponse('Sorry, I encountered an error. Please try again.');
+      setShowInlineModal(true);
+      setIsExpanded(false);
     } finally {
       setIsLoading(false);
     }
   };
 
   const handleSuggestionClick = (suggestion: typeof bizzySuggestions[0]) => {
-    // For now, set the query to the suggestion title for processing
-    setQuery(`Tell me more about: ${suggestion.title}`);
-    if (inputRef.current) {
-      inputRef.current.focus();
-    }
+    // Route to Forge for these actionable suggestions
+    navigate('/forge?suggestion=' + encodeURIComponent(suggestion.id.toString()));
+    setIsExpanded(false);
   };
 
   const handleClose = () => {
@@ -149,6 +178,12 @@ export function AskBizzy({ className = "" }: AskBizzyProps) {
     setQuery('');
     setResponse('');
     setShowApiKeyInput(false);
+  };
+
+  const handleCloseInlineModal = () => {
+    setShowInlineModal(false);
+    setResponse('');
+    setQuery('');
   };
 
   if (!isExpanded) {
@@ -265,25 +300,16 @@ export function AskBizzy({ className = "" }: AskBizzyProps) {
             </div>
           )}
 
-          {/* Response */}
-          {response && (
-            <div className="space-y-2">
-              <div className="flex items-center gap-2">
-                <Sparkles className="w-4 h-4 text-primary" />
-                <p className="text-sm font-medium">Bizzy's Response:</p>
-              </div>
-              <Card className="bg-gradient-subtle border-primary/20">
-                <CardContent className="p-4">
-                  <p className="text-sm leading-relaxed whitespace-pre-wrap">{response}</p>
-                </CardContent>
-              </Card>
-              <p className="text-xs text-muted-foreground">
-                Response saved to your Inbox for future reference
-              </p>
-            </div>
-          )}
         </CardContent>
       </Card>
+      
+      {/* Inline Answer Modal */}
+      <InlineAnswerModal
+        isOpen={showInlineModal}
+        onClose={handleCloseInlineModal}
+        query={query}
+        response={response}
+      />
     </div>
   );
 }
