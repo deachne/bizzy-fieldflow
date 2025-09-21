@@ -22,6 +22,7 @@ export default {
         primary: {
           DEFAULT: "hsl(var(--primary))",
           foreground: "hsl(var(--primary-foreground))",
+          glow: "hsl(var(--primary-glow))",
         },
         secondary: {
           DEFAULT: "hsl(var(--secondary))",
@@ -47,6 +48,25 @@ export default {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",
         },
+        // Farm module colors
+        farmer: {
+          DEFAULT: "hsl(var(--farmer))",
+          light: "hsl(var(--farmer-light))",
+        },
+        trader: {
+          DEFAULT: "hsl(var(--trader))",
+          light: "hsl(var(--trader-light))",
+        },
+        accounting: {
+          DEFAULT: "hsl(var(--accounting))",
+          light: "hsl(var(--accounting-light))",
+        },
+        library: {
+          DEFAULT: "hsl(var(--library))",
+          light: "hsl(var(--library-light))",
+        },
+        success: "hsl(var(--success))",
+        warning: "hsl(var(--warning))",
         sidebar: {
           DEFAULT: "hsl(var(--sidebar-background))",
           foreground: "hsl(var(--sidebar-foreground))",
@@ -57,6 +77,19 @@ export default {
           border: "hsl(var(--sidebar-border))",
           ring: "hsl(var(--sidebar-ring))",
         },
+      },
+      backgroundImage: {
+        'gradient-primary': 'var(--gradient-primary)',
+        'gradient-farmer': 'var(--gradient-farmer)',
+        'gradient-trader': 'var(--gradient-trader)',
+        'gradient-accounting': 'var(--gradient-accounting)',
+        'gradient-earth': 'var(--gradient-earth)',
+      },
+      boxShadow: {
+        'soft': 'var(--shadow-soft)',
+        'medium': 'var(--shadow-medium)',
+        'strong': 'var(--shadow-strong)',
+        'glow': 'var(--shadow-glow)',
       },
       borderRadius: {
         lg: "var(--radius)",
