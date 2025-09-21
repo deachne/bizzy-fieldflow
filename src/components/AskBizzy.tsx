@@ -19,13 +19,39 @@ export function AskBizzy({ className = "" }: AskBizzyProps) {
   const [showApiKeyInput, setShowApiKeyInput] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  const suggestions = [
-    "Did it rain during home field harvest?",
-    "What's the best time to apply fertilizer?",
-    "Show me my equipment maintenance schedule",
-    "What are my field conditions today?",
-    "Create a task to fix the mower",
-    "What's my canola price forecast?"
+  const bizzySuggestions = [
+    {
+      id: 1,
+      title: "Sell 10% of canola to cover October expenses",
+      type: "financial",
+      action: "View Analysis",
+      icon: "TrendingUp",
+      priority: "high"
+    },
+    {
+      id: 2,
+      title: "Fix mower before next week's rain",
+      type: "task",
+      action: "Create Task", 
+      icon: "Settings",
+      priority: "medium"
+    },
+    {
+      id: 3,
+      title: "Schedule soil test for north field",
+      type: "planning",
+      action: "View Details",
+      icon: "TestTube",
+      priority: "low"
+    },
+    {
+      id: 4,
+      title: "Weather window for herbicide application",
+      type: "weather",
+      action: "View Forecast",
+      icon: "Cloud",
+      priority: "high"
+    }
   ];
 
   useEffect(() => {
@@ -110,8 +136,9 @@ export function AskBizzy({ className = "" }: AskBizzyProps) {
     }
   };
 
-  const handleSuggestionClick = (suggestion: string) => {
-    setQuery(suggestion);
+  const handleSuggestionClick = (suggestion: typeof bizzySuggestions[0]) => {
+    // For now, set the query to the suggestion title for processing
+    setQuery(`Tell me more about: ${suggestion.title}`);
     if (inputRef.current) {
       inputRef.current.focus();
     }
@@ -208,20 +235,31 @@ export function AskBizzy({ className = "" }: AskBizzyProps) {
             </div>
           </form>
 
-          {/* Suggestions */}
+          {/* Bizzy Suggestions */}
           {!response && (
-            <div className="space-y-2">
-              <p className="text-sm text-muted-foreground">Try asking:</p>
-              <div className="flex flex-wrap gap-2">
-                {suggestions.map((suggestion, index) => (
-                  <Badge
-                    key={index}
-                    variant="outline"
-                    className="cursor-pointer hover:bg-accent transition-colors"
+            <div className="space-y-3">
+              <p className="text-sm font-medium text-muted-foreground">Bizzy Suggests:</p>
+              <div className="space-y-2">
+                {bizzySuggestions.map((suggestion) => (
+                  <div
+                    key={suggestion.id}
+                    className="flex items-center justify-between p-3 rounded-lg border border-border/50 hover:border-primary/30 transition-colors cursor-pointer group"
                     onClick={() => handleSuggestionClick(suggestion)}
                   >
-                    {suggestion}
-                  </Badge>
+                    <div className="flex items-center gap-3 flex-1">
+                      <div className={`w-2 h-2 rounded-full ${
+                        suggestion.priority === 'high' ? 'bg-red-500' : 
+                        suggestion.priority === 'medium' ? 'bg-yellow-500' : 
+                        'bg-green-500'
+                      }`} />
+                      <span className="text-sm text-foreground group-hover:text-primary transition-colors">
+                        {suggestion.title}
+                      </span>
+                    </div>
+                    <Badge variant="secondary" className="text-xs">
+                      {suggestion.action}
+                    </Badge>
+                  </div>
                 ))}
               </div>
             </div>
