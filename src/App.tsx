@@ -10,6 +10,7 @@ import KnowledgeHub from "./pages/KnowledgeHub";
 import Library from "./pages/Library";
 import BizzyFarmer from "./pages/BizzyFarmer";
 import TheForge from "./pages/TheForge";
+import Notes from "./pages/Notes";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -27,6 +28,7 @@ const App = () => (
             <Route path="knowledge" element={<KnowledgeHub />} />
             <Route path="library" element={<Library />} />
             <Route path="farmer" element={<BizzyFarmer />} />
+            <Route path="notes" element={<Notes />} />
             <Route path="forge" element={<TheForge />} />
             <Route path="trader" element={<div className="p-6">BizzyTrader - Coming Soon</div>} />
             <Route path="accounting" element={<div className="p-6">Accounting - Coming Soon</div>} />

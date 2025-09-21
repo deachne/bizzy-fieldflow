@@ -1,4 +1,4 @@
-import { Home, Inbox, Search, BookOpen, Tractor, Zap, Settings, Hammer } from "lucide-react";
+import { Home, Inbox, Search, BookOpen, Tractor, Zap, Settings, Hammer, FileText } from "lucide-react";
 import { NavLink, useLocation } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
@@ -27,6 +27,12 @@ const navigationItems = [
     href: "/library",
     icon: BookOpen,
     badge: "3",
+  },
+  {
+    name: "Notes",
+    href: "/notes",
+    icon: FileText,
+    badge: null,
   },
   {
     name: "The Forge",
