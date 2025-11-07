@@ -38,8 +38,8 @@ export default function Settings() {
       setPerplexityApiKey(perplexityKey);
       toast.success('Perplexity API key saved successfully');
       
-      // Trigger storage event for other components
-      window.dispatchEvent(new Event('storage'));
+      // Trigger custom event for other components
+      window.dispatchEvent(new Event('apiKeyUpdated'));
     } catch (error) {
       toast.error('Failed to save Perplexity API key');
       console.error('Error saving API key:', error);
@@ -60,8 +60,8 @@ export default function Settings() {
       setAnthropicApiKey(anthropicKey);
       toast.success('Anthropic API key saved successfully');
       
-      // Trigger storage event for other components
-      window.dispatchEvent(new Event('storage'));
+      // Trigger custom event for other components
+      window.dispatchEvent(new Event('apiKeyUpdated'));
     } catch (error) {
       toast.error('Failed to save Anthropic API key');
       console.error('Error saving API key:', error);

@@ -23,15 +23,25 @@ export function AskBizzy({ className = "" }: AskBizzyProps) {
   const inputRef = useRef<HTMLInputElement>(null);
   const navigate = useNavigate();
 
-  // Listen for API key changes from Settings
+  // Refresh API key when component expands or mounts
   useEffect(() => {
-    const handleStorageChange = () => {
-      setApiKey(getPerplexityApiKey());
+    const refreshApiKey = () => {
+      const currentKey = getPerplexityApiKey();
+      if (currentKey !== apiKey) {
+        setApiKey(currentKey);
+      }
     };
     
-    window.addEventListener('storage', handleStorageChange);
-    return () => window.removeEventListener('storage', handleStorageChange);
-  }, []);
+    refreshApiKey();
+    
+    // Also listen for custom event from Settings
+    const handleApiKeyUpdate = () => {
+      refreshApiKey();
+    };
+    
+    window.addEventListener('apiKeyUpdated', handleApiKeyUpdate);
+    return () => window.removeEventListener('apiKeyUpdated', handleApiKeyUpdate);
+  }, [isExpanded, apiKey]);
 
   const bizzySuggestions = [
     {
