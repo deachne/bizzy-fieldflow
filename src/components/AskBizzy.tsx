@@ -7,6 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
 import { useNavigate } from 'react-router-dom';
 import { InlineAnswerModal } from './InlineAnswerModal';
+import { getPerplexityApiKey } from '@/lib/utils';
 
 interface AskBizzyProps {
   className?: string;
@@ -17,11 +18,20 @@ export function AskBizzy({ className = "" }: AskBizzyProps) {
   const [query, setQuery] = useState('');
   const [response, setResponse] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const [apiKey, setApiKey] = useState('');
-  const [showApiKeyInput, setShowApiKeyInput] = useState(false);
+  const [apiKey, setApiKey] = useState(getPerplexityApiKey());
   const [showInlineModal, setShowInlineModal] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const navigate = useNavigate();
+
+  // Listen for API key changes from Settings
+  useEffect(() => {
+    const handleStorageChange = () => {
+      setApiKey(getPerplexityApiKey());
+    };
+    
+    window.addEventListener('storage', handleStorageChange);
+    return () => window.removeEventListener('storage', handleStorageChange);
+  }, []);
 
   const bizzySuggestions = [
     {
@@ -83,8 +93,18 @@ export function AskBizzy({ className = "" }: AskBizzyProps) {
 
     // Check if we have an API key
     if (!apiKey) {
-      setShowApiKeyInput(true);
-      toast.error("Please enter your Perplexity API key to use Ask Bizzy");
+      toast.error(
+        <div>
+          Please configure your API key in{' '}
+          <button
+            onClick={() => navigate('/settings')}
+            className="underline font-semibold"
+          >
+            Settings
+          </button>
+        </div>,
+        { duration: 5000 }
+      );
       return;
     }
 
@@ -177,7 +197,6 @@ export function AskBizzy({ className = "" }: AskBizzyProps) {
     setIsExpanded(false);
     setQuery('');
     setResponse('');
-    setShowApiKeyInput(false);
   };
 
   const handleCloseInlineModal = () => {
@@ -226,19 +245,18 @@ export function AskBizzy({ className = "" }: AskBizzyProps) {
             </Button>
           </div>
 
-          {/* API Key Input */}
-          {showApiKeyInput && (
-            <div className="space-y-2 p-4 bg-muted/50 rounded-lg">
-              <label className="text-sm font-medium">Perplexity API Key</label>
-              <Input
-                type="password"
-                placeholder="Enter your Perplexity API key..."
-                value={apiKey}
-                onChange={(e) => setApiKey(e.target.value)}
-                className="bg-background"
-              />
-              <p className="text-xs text-muted-foreground">
-                Get your API key from <a href="https://www.perplexity.ai/settings/api" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">perplexity.ai/settings/api</a>
+          {/* No API Key Warning */}
+          {!apiKey && (
+            <div className="p-3 bg-warning/10 border border-warning/20 rounded-lg">
+              <p className="text-sm text-muted-foreground">
+                Please configure your API key in{' '}
+                <button
+                  onClick={() => navigate('/settings')}
+                  className="text-primary hover:underline font-semibold"
+                >
+                  Settings
+                </button>
+                {' '}to use Ask Bizzy
               </p>
             </div>
           )}

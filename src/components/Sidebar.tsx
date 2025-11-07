@@ -1,4 +1,4 @@
-import { Home, Inbox, Search, BookOpen, Tractor, Zap, Settings, Hammer, FileText } from "lucide-react";
+import { Home, Inbox, Search, BookOpen, Tractor, Zap, Settings as SettingsIcon, Hammer, FileText } from "lucide-react";
 import { NavLink, useLocation } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
@@ -60,11 +60,17 @@ const moduleItems = [
   {
     name: "Accounting",
     href: "/accounting",
-    icon: Settings,
+    icon: SettingsIcon,
     color: "accounting",
     stats: "Cashflow: $42,500",
   },
 ];
+
+const settingsItem = {
+  name: "Settings",
+  href: "/settings",
+  icon: SettingsIcon,
+};
 
 export function Sidebar() {
   const location = useLocation();
@@ -159,6 +165,22 @@ export function Sidebar() {
               );
             })}
           </div>
+        </div>
+
+        {/* Settings */}
+        <div className="border-t pt-4 mt-auto">
+          <NavLink
+            to={settingsItem.href}
+            className={cn(
+              "flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors text-sm font-medium",
+              location.pathname === settingsItem.href
+                ? "bg-primary text-primary-foreground shadow-soft"
+                : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
+            )}
+          >
+            <settingsItem.icon className="w-4 h-4" />
+            <span>{settingsItem.name}</span>
+          </NavLink>
         </div>
       </nav>
     </div>
