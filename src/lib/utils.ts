@@ -7,6 +7,7 @@ export function cn(...inputs: ClassValue[]) {
 
 // API Key Management
 export const PERPLEXITY_API_KEY = 'bizzy_perplexity_api_key';
+export const ANTHROPIC_API_KEY = 'bizzy_anthropic_api_key';
 
 export const getPerplexityApiKey = (): string => {
   if (typeof window === 'undefined') return '';
@@ -16,4 +17,14 @@ export const getPerplexityApiKey = (): string => {
 export const setPerplexityApiKey = (key: string): void => {
   if (typeof window === 'undefined') return;
   localStorage.setItem(PERPLEXITY_API_KEY, key);
+};
+
+export const getAnthropicApiKey = (): string => {
+  if (typeof window === 'undefined') return '';
+  return localStorage.getItem(ANTHROPIC_API_KEY) || '';
+};
+
+export const setAnthropicApiKey = (key: string): void => {
+  if (typeof window === 'undefined') return;
+  localStorage.setItem(ANTHROPIC_API_KEY, key);
 };

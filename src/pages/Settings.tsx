@@ -5,56 +5,85 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { toast } from 'sonner';
-import { getPerplexityApiKey, setPerplexityApiKey } from '@/lib/utils';
+import { getPerplexityApiKey, setPerplexityApiKey, getAnthropicApiKey, setAnthropicApiKey } from '@/lib/utils';
 
 export default function Settings() {
-  const [apiKey, setApiKey] = useState('');
-  const [isSaving, setIsSaving] = useState(false);
-  const [isTesting, setIsTesting] = useState(false);
+  const [perplexityKey, setPerplexityKey] = useState('');
+  const [anthropicKey, setAnthropicKey] = useState('');
+  const [isSavingPerplexity, setIsSavingPerplexity] = useState(false);
+  const [isSavingAnthropic, setIsSavingAnthropic] = useState(false);
+  const [isTestingPerplexity, setIsTestingPerplexity] = useState(false);
+  const [isTestingAnthropic, setIsTestingAnthropic] = useState(false);
 
   useEffect(() => {
-    // Load existing API key on mount
-    const existingKey = getPerplexityApiKey();
-    if (existingKey) {
-      setApiKey(existingKey);
+    // Load existing API keys on mount
+    const existingPerplexityKey = getPerplexityApiKey();
+    const existingAnthropicKey = getAnthropicApiKey();
+    if (existingPerplexityKey) {
+      setPerplexityKey(existingPerplexityKey);
+    }
+    if (existingAnthropicKey) {
+      setAnthropicKey(existingAnthropicKey);
     }
   }, []);
 
-  const handleSave = () => {
-    if (!apiKey.trim()) {
-      toast.error('Please enter an API key');
+  const handleSavePerplexity = () => {
+    if (!perplexityKey.trim()) {
+      toast.error('Please enter a Perplexity API key');
       return;
     }
 
-    setIsSaving(true);
+    setIsSavingPerplexity(true);
     
     try {
-      setPerplexityApiKey(apiKey);
-      toast.success('API key saved successfully');
+      setPerplexityApiKey(perplexityKey);
+      toast.success('Perplexity API key saved successfully');
       
       // Trigger storage event for other components
       window.dispatchEvent(new Event('storage'));
     } catch (error) {
-      toast.error('Failed to save API key');
+      toast.error('Failed to save Perplexity API key');
       console.error('Error saving API key:', error);
     } finally {
-      setIsSaving(false);
+      setIsSavingPerplexity(false);
     }
   };
 
-  const handleTest = async () => {
-    if (!apiKey.trim()) {
-      toast.error('Please enter an API key first');
+  const handleSaveAnthropic = () => {
+    if (!anthropicKey.trim()) {
+      toast.error('Please enter an Anthropic API key');
       return;
     }
 
-    setIsTesting(true);
+    setIsSavingAnthropic(true);
+    
+    try {
+      setAnthropicApiKey(anthropicKey);
+      toast.success('Anthropic API key saved successfully');
+      
+      // Trigger storage event for other components
+      window.dispatchEvent(new Event('storage'));
+    } catch (error) {
+      toast.error('Failed to save Anthropic API key');
+      console.error('Error saving API key:', error);
+    } finally {
+      setIsSavingAnthropic(false);
+    }
+  };
+
+  const handleTestPerplexity = async () => {
+    if (!perplexityKey.trim()) {
+      toast.error('Please enter a Perplexity API key first');
+      return;
+    }
+
+    setIsTestingPerplexity(true);
 
     try {
       const response = await fetch('https://api.perplexity.ai/chat/completions', {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${apiKey}`,
+          'Authorization': `Bearer ${perplexityKey}`,
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
@@ -70,16 +99,58 @@ export default function Settings() {
       });
 
       if (response.ok) {
-        toast.success('API key is valid! Connection successful.');
+        toast.success('Perplexity API key is valid! Connection successful.');
       } else {
         const errorData = await response.json();
-        toast.error(`API key test failed: ${errorData.error?.message || 'Invalid key'}`);
+        toast.error(`Perplexity API key test failed: ${errorData.error?.message || 'Invalid key'}`);
       }
     } catch (error) {
-      toast.error('Failed to test API connection');
+      toast.error('Failed to test Perplexity API connection');
       console.error('Error testing API key:', error);
     } finally {
-      setIsTesting(false);
+      setIsTestingPerplexity(false);
+    }
+  };
+
+  const handleTestAnthropic = async () => {
+    if (!anthropicKey.trim()) {
+      toast.error('Please enter an Anthropic API key first');
+      return;
+    }
+
+    setIsTestingAnthropic(true);
+
+    try {
+      const response = await fetch('https://api.anthropic.com/v1/messages', {
+        method: 'POST',
+        headers: {
+          'x-api-key': anthropicKey,
+          'anthropic-version': '2023-06-01',
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          model: 'claude-sonnet-4-5',
+          max_tokens: 50,
+          messages: [
+            {
+              role: 'user',
+              content: 'Say "Connection successful" if you can read this.'
+            }
+          ],
+        }),
+      });
+
+      if (response.ok) {
+        toast.success('Anthropic API key is valid! Connection successful.');
+      } else {
+        const errorData = await response.json();
+        toast.error(`Anthropic API key test failed: ${errorData.error?.message || 'Invalid key'}`);
+      }
+    } catch (error) {
+      toast.error('Failed to test Anthropic API connection');
+      console.error('Error testing API key:', error);
+    } finally {
+      setIsTestingAnthropic(false);
     }
   };
 
@@ -97,12 +168,12 @@ export default function Settings() {
           </div>
         </div>
 
-        {/* API Configuration */}
+        {/* Perplexity API Configuration */}
         <Card className="shadow-soft">
           <CardHeader>
             <div className="flex items-center gap-2">
               <Key className="w-5 h-5 text-primary" />
-              <CardTitle>API Configuration</CardTitle>
+              <CardTitle>Perplexity API</CardTitle>
             </div>
             <CardDescription>
               Configure your Perplexity API key to enable Ask Bizzy's AI features
@@ -110,13 +181,13 @@ export default function Settings() {
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="api-key">Perplexity API Key</Label>
+              <Label htmlFor="perplexity-key">Perplexity API Key</Label>
               <Input
-                id="api-key"
+                id="perplexity-key"
                 type="password"
                 placeholder="pplx-..."
-                value={apiKey}
-                onChange={(e) => setApiKey(e.target.value)}
+                value={perplexityKey}
+                onChange={(e) => setPerplexityKey(e.target.value)}
                 className="font-mono"
               />
               <p className="text-xs text-muted-foreground">
@@ -134,11 +205,11 @@ export default function Settings() {
 
             <div className="flex gap-3">
               <Button
-                onClick={handleSave}
-                disabled={isSaving || !apiKey.trim()}
+                onClick={handleSavePerplexity}
+                disabled={isSavingPerplexity || !perplexityKey.trim()}
                 className="flex items-center gap-2"
               >
-                {isSaving ? (
+                {isSavingPerplexity ? (
                   <>
                     <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
                     Saving...
@@ -153,11 +224,11 @@ export default function Settings() {
 
               <Button
                 variant="outline"
-                onClick={handleTest}
-                disabled={isTesting || !apiKey.trim()}
+                onClick={handleTestPerplexity}
+                disabled={isTestingPerplexity || !perplexityKey.trim()}
                 className="flex items-center gap-2"
               >
-                {isTesting ? (
+                {isTestingPerplexity ? (
                   <>
                     <div className="w-4 h-4 border-2 border-primary/30 border-t-primary rounded-full animate-spin" />
                     Testing...
@@ -174,7 +245,90 @@ export default function Settings() {
             {getPerplexityApiKey() && (
               <div className="flex items-center gap-2 p-3 bg-success/10 border border-success/20 rounded-lg">
                 <CheckCircle className="w-4 h-4 text-success" />
-                <span className="text-sm text-success">API key is configured</span>
+                <span className="text-sm text-success">Perplexity API key is configured</span>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
+        {/* Anthropic API Configuration */}
+        <Card className="shadow-soft">
+          <CardHeader>
+            <div className="flex items-center gap-2">
+              <Key className="w-5 h-5 text-primary" />
+              <CardTitle>Anthropic API</CardTitle>
+            </div>
+            <CardDescription>
+              Configure your Anthropic API key for Claude models
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="anthropic-key">Anthropic API Key</Label>
+              <Input
+                id="anthropic-key"
+                type="password"
+                placeholder="sk-ant-..."
+                value={anthropicKey}
+                onChange={(e) => setAnthropicKey(e.target.value)}
+                className="font-mono"
+              />
+              <p className="text-xs text-muted-foreground">
+                Get your API key from{' '}
+                <a
+                  href="https://console.anthropic.com/settings/keys"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-primary hover:underline"
+                >
+                  console.anthropic.com/settings/keys
+                </a>
+              </p>
+            </div>
+
+            <div className="flex gap-3">
+              <Button
+                onClick={handleSaveAnthropic}
+                disabled={isSavingAnthropic || !anthropicKey.trim()}
+                className="flex items-center gap-2"
+              >
+                {isSavingAnthropic ? (
+                  <>
+                    <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                    Saving...
+                  </>
+                ) : (
+                  <>
+                    <CheckCircle className="w-4 h-4" />
+                    Save API Key
+                  </>
+                )}
+              </Button>
+
+              <Button
+                variant="outline"
+                onClick={handleTestAnthropic}
+                disabled={isTestingAnthropic || !anthropicKey.trim()}
+                className="flex items-center gap-2"
+              >
+                {isTestingAnthropic ? (
+                  <>
+                    <div className="w-4 h-4 border-2 border-primary/30 border-t-primary rounded-full animate-spin" />
+                    Testing...
+                  </>
+                ) : (
+                  <>
+                    <AlertCircle className="w-4 h-4" />
+                    Test Connection
+                  </>
+                )}
+              </Button>
+            </div>
+
+            {getAnthropicApiKey() && (
+              <div className="flex items-center gap-2 p-3 bg-success/10 border border-success/20 rounded-lg">
+                <CheckCircle className="w-4 h-4 text-success" />
+                <span className="text-sm text-success">Anthropic API key is configured</span>
               </div>
             )}
           </CardContent>
@@ -183,15 +337,18 @@ export default function Settings() {
         {/* About Section */}
         <Card className="shadow-soft">
           <CardHeader>
-            <CardTitle>About Ask Bizzy</CardTitle>
+            <CardTitle>About API Keys</CardTitle>
           </CardHeader>
           <CardContent className="space-y-3 text-sm text-muted-foreground">
             <p>
-              Ask Bizzy uses Perplexity AI to provide intelligent answers to your farm management questions.
-              The API key is stored securely in your browser and is never shared with third parties.
+              <strong>Perplexity:</strong> Powers Ask Bizzy's intelligent answers with real-time web search capabilities.
             </p>
             <p>
-              Your queries and responses are saved to your Inbox for easy reference later.
+              <strong>Anthropic:</strong> Provides access to Claude models for advanced AI features.
+            </p>
+            <p>
+              All API keys are stored securely in your browser and are never shared with third parties.
+              Your queries and responses are saved to your Inbox for easy reference.
             </p>
           </CardContent>
         </Card>
