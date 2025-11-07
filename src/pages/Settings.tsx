@@ -13,7 +13,6 @@ export default function Settings() {
   const [isSavingPerplexity, setIsSavingPerplexity] = useState(false);
   const [isSavingAnthropic, setIsSavingAnthropic] = useState(false);
   const [isTestingPerplexity, setIsTestingPerplexity] = useState(false);
-  const [isTestingAnthropic, setIsTestingAnthropic] = useState(false);
 
   useEffect(() => {
     // Load existing API keys on mount
@@ -112,47 +111,6 @@ export default function Settings() {
     }
   };
 
-  const handleTestAnthropic = async () => {
-    if (!anthropicKey.trim()) {
-      toast.error('Please enter an Anthropic API key first');
-      return;
-    }
-
-    setIsTestingAnthropic(true);
-
-    try {
-      const response = await fetch('https://api.anthropic.com/v1/messages', {
-        method: 'POST',
-        headers: {
-          'x-api-key': anthropicKey,
-          'anthropic-version': '2023-06-01',
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          model: 'claude-sonnet-4-5',
-          max_tokens: 50,
-          messages: [
-            {
-              role: 'user',
-              content: 'Say "Connection successful" if you can read this.'
-            }
-          ],
-        }),
-      });
-
-      if (response.ok) {
-        toast.success('Anthropic API key is valid! Connection successful.');
-      } else {
-        const errorData = await response.json();
-        toast.error(`Anthropic API key test failed: ${errorData.error?.message || 'Invalid key'}`);
-      }
-    } catch (error) {
-      toast.error('Failed to test Anthropic API connection');
-      console.error('Error testing API key:', error);
-    } finally {
-      setIsTestingAnthropic(false);
-    }
-  };
 
   return (
     <div className="min-h-screen bg-gradient-earth p-6">
@@ -286,43 +244,29 @@ export default function Settings() {
               </p>
             </div>
 
-            <div className="flex gap-3">
-              <Button
-                onClick={handleSaveAnthropic}
-                disabled={isSavingAnthropic || !anthropicKey.trim()}
-                className="flex items-center gap-2"
-              >
-                {isSavingAnthropic ? (
-                  <>
-                    <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                    Saving...
-                  </>
-                ) : (
-                  <>
-                    <CheckCircle className="w-4 h-4" />
-                    Save API Key
-                  </>
-                )}
-              </Button>
+            <Button
+              onClick={handleSaveAnthropic}
+              disabled={isSavingAnthropic || !anthropicKey.trim()}
+              className="flex items-center gap-2"
+            >
+              {isSavingAnthropic ? (
+                <>
+                  <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                  Saving...
+                </>
+              ) : (
+                <>
+                  <CheckCircle className="w-4 h-4" />
+                  Save API Key
+                </>
+              )}
+            </Button>
 
-              <Button
-                variant="outline"
-                onClick={handleTestAnthropic}
-                disabled={isTestingAnthropic || !anthropicKey.trim()}
-                className="flex items-center gap-2"
-              >
-                {isTestingAnthropic ? (
-                  <>
-                    <div className="w-4 h-4 border-2 border-primary/30 border-t-primary rounded-full animate-spin" />
-                    Testing...
-                  </>
-                ) : (
-                  <>
-                    <AlertCircle className="w-4 h-4" />
-                    Test Connection
-                  </>
-                )}
-              </Button>
+            <div className="p-3 bg-muted/50 rounded-lg">
+              <p className="text-xs text-muted-foreground">
+                <strong>Note:</strong> Anthropic API cannot be tested directly from the browser due to CORS restrictions. 
+                The key will be validated when you use it in your application.
+              </p>
             </div>
 
             {getAnthropicApiKey() && (
