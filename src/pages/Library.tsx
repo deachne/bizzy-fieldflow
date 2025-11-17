@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { BookOpen, FileText, Download, ExternalLink, Link, Plus, Search, Filter } from "lucide-react";
+import { BookOpen, FileText, Download, ExternalLink, Link, Plus, Search, Filter, Grid, List } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -90,6 +90,7 @@ export default function Library() {
   const [selectedType, setSelectedType] = useState("All");
   const [selectedTag, setSelectedTag] = useState("All");
   const [selectedItem, setSelectedItem] = useState<any>(null);
+  const [viewMode, setViewMode] = useState<"grid" | "list">("list");
 
   const filteredItems = libraryItems.filter(item => {
     const matchesSearch = item.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -165,13 +166,32 @@ export default function Library() {
                 <Badge variant="outline" className="ml-auto">
                   {filteredItems.length} items
                 </Badge>
+                <div className="flex gap-1 ml-2 border rounded-md">
+                  <Button
+                    variant={viewMode === "grid" ? "default" : "ghost"}
+                    size="sm"
+                    onClick={() => setViewMode("grid")}
+                    className="h-9 px-3"
+                  >
+                    <Grid className="w-4 h-4" />
+                  </Button>
+                  <Button
+                    variant={viewMode === "list" ? "default" : "ghost"}
+                    size="sm"
+                    onClick={() => setViewMode("list")}
+                    className="h-9 px-3"
+                  >
+                    <List className="w-4 h-4" />
+                  </Button>
+                </div>
               </div>
             </CardContent>
           </Card>
 
           {/* Library Items */}
-          <div className="space-y-3">
-            {filteredItems.map((item) => (
+          <div className={viewMode === "grid" ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3" : "space-y-3"}>
+            {viewMode === "list" ? (
+              filteredItems.map((item) => (
               <Card 
                 key={item.id} 
                 className={`shadow-soft hover:shadow-medium transition-all cursor-pointer ${
@@ -246,7 +266,65 @@ export default function Library() {
                   </div>
                 </CardContent>
               </Card>
-            ))}
+            ))
+            ) : (
+              filteredItems.map((item) => (
+                <Card 
+                  key={item.id} 
+                  className={`shadow-soft hover:shadow-medium transition-all cursor-pointer ${
+                    selectedItem?.id === item.id ? 'ring-2 ring-primary' : ''
+                  }`}
+                  onClick={() => setSelectedItem(item)}
+                >
+                  <CardContent className="p-4">
+                    {/* Thumbnail */}
+                    <div className="w-full h-40 bg-library-light rounded-lg flex items-center justify-center text-4xl overflow-hidden mb-4">
+                      {item.thumbnail.startsWith('/') ? (
+                        <img 
+                          src={item.thumbnail} 
+                          alt={item.title}
+                          className="w-full h-full object-cover"
+                        />
+                      ) : (
+                        <span>{item.thumbnail}</span>
+                      )}
+                    </div>
+
+                    {/* Content */}
+                    <div className="space-y-3">
+                      <div className="flex items-start justify-between gap-2">
+                        <h3 className="font-semibold text-base line-clamp-2 flex-1">{item.title}</h3>
+                        <Badge variant="secondary" className="text-xs flex-shrink-0">
+                          {item.type}
+                        </Badge>
+                      </div>
+
+                      <p className="text-xs text-muted-foreground line-clamp-2">
+                        {item.description}
+                      </p>
+
+                      <div className="flex flex-wrap gap-1">
+                        {item.tags.slice(0, 3).map((tag) => (
+                          <Badge key={tag} variant="outline" className="text-xs">
+                            #{tag}
+                          </Badge>
+                        ))}
+                        {item.tags.length > 3 && (
+                          <Badge variant="outline" className="text-xs">
+                            +{item.tags.length - 3}
+                          </Badge>
+                        )}
+                      </div>
+
+                      <div className="flex items-center justify-between text-xs text-muted-foreground pt-2 border-t">
+                        <span>{item.pages} pages</span>
+                        <span>{item.fileSize}</span>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))
+            )}
           </div>
         </div>
       </div>
