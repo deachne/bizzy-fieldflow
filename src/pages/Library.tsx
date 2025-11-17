@@ -5,6 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
+import { getTagColorClasses } from "@/utils/tagColors";
 
 const libraryItems = [
   {
@@ -245,7 +246,7 @@ export default function Library() {
                       <div className="flex items-center justify-between">
                         <div className="flex flex-wrap gap-1">
                           {item.tags.slice(0, 4).map((tag) => (
-                            <Badge key={tag} variant="outline" className="text-xs">
+                            <Badge key={tag} variant="outline" className={`text-xs ${getTagColorClasses(tag)}`}>
                               #{tag}
                             </Badge>
                           ))}
@@ -305,7 +306,7 @@ export default function Library() {
 
                       <div className="flex flex-wrap gap-1">
                         {item.tags.slice(0, 3).map((tag) => (
-                          <Badge key={tag} variant="outline" className="text-xs">
+                          <Badge key={tag} variant="outline" className={`text-xs ${getTagColorClasses(tag)}`}>
                             #{tag}
                           </Badge>
                         ))}
@@ -385,7 +386,7 @@ export default function Library() {
               <h4 className="font-medium mb-2">Tags</h4>
               <div className="flex flex-wrap gap-1">
                 {selectedItem.tags.map((tag: string) => (
-                  <Badge key={tag} variant="outline" className="text-xs">
+                  <Badge key={tag} variant="outline" className={`text-xs ${getTagColorClasses(tag)}`}>
                     #{tag}
                   </Badge>
                 ))}

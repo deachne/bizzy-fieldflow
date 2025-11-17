@@ -5,6 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { getTagColorClasses } from "@/utils/tagColors";
 
 const defaultKnowledgeItems = [
   {
@@ -344,7 +345,7 @@ export default function KnowledgeHub() {
                   
                   <div className="flex flex-wrap gap-1">
                     {item.tags.slice(0, 4).map((tag) => (
-                      <Badge key={tag} variant="outline" className="text-xs">
+                      <Badge key={tag} variant="outline" className={`text-xs ${getTagColorClasses(tag)}`}>
                         #{tag}
                       </Badge>
                     ))}
