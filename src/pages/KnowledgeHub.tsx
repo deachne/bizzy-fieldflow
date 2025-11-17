@@ -67,6 +67,16 @@ const defaultKnowledgeItems = [
     module: "Library",
     icon: BookOpen,
   },
+  {
+    id: 7,
+    type: "reference",
+    title: "Plant Analysis Report",
+    content: "Laboratory soil and plant tissue analysis report for DARCY NESTIBO field C24046-50001-1.",
+    tags: ["analysis", "laboratory", "soil-test", "plant-health"],
+    date: "Nov 17, 2024",
+    module: "Library",
+    icon: BookOpen,
+  },
 ];
 
 const modules = ["All", "Hub", "Farmer", "Trader", "Library"];
