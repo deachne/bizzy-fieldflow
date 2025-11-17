@@ -1,4 +1,3 @@
-import { Home, Inbox, Search, BookOpen, Tractor, Zap, Settings as SettingsIcon, Hammer, FileText } from "lucide-react";
 import { NavLink, useLocation } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
@@ -7,37 +6,37 @@ const navigationItems = [
   {
     name: "Today Hub",
     href: "/",
-    icon: Home,
+    emoji: "🏠",
     badge: null,
   },
   {
     name: "Inbox",
     href: "/inbox", 
-    icon: Inbox,
+    emoji: "📥",
     badge: "2",
   },
   {
     name: "Knowledge Hub",
     href: "/knowledge",
-    icon: Search,
+    emoji: "🔍",
     badge: "12",
   },
   {
     name: "Library",
     href: "/library",
-    icon: BookOpen,
+    emoji: "📚",
     badge: "3",
   },
   {
     name: "Notes",
     href: "/notes",
-    icon: FileText,
+    emoji: "📝",
     badge: null,
   },
   {
     name: "The Forge",
     href: "/forge",
-    icon: Hammer,
+    emoji: "🔨",
     badge: null,
   },
 ];
@@ -46,21 +45,21 @@ const moduleItems = [
   {
     name: "BizzyFarmer",
     href: "/farmer",
-    icon: Tractor,
+    emoji: "🚜",
     color: "farmer",
     stats: "780 acres harvested / 2 hazards flagged",
   },
   {
     name: "BizzyTrader", 
     href: "/trader",
-    icon: Zap,
+    emoji: "📈",
     color: "trader",
     stats: "Canola $865/MT ↗",
   },
   {
     name: "Accounting",
     href: "/accounting",
-    icon: SettingsIcon,
+    emoji: "💰",
     color: "accounting",
     stats: "Cashflow: $42,500",
   },
@@ -69,7 +68,7 @@ const moduleItems = [
 const settingsItem = {
   name: "Settings",
   href: "/settings",
-  icon: SettingsIcon,
+  emoji: "⚙️",
 };
 
 export function Sidebar() {
@@ -81,7 +80,7 @@ export function Sidebar() {
       <div className="p-6 border-b">
         <div className="flex items-center gap-3">
           <div className="w-8 h-8 rounded-lg bg-gradient-farmer flex items-center justify-center">
-            <Tractor className="w-4 h-4 text-white" />
+            <span className="text-base">🚜</span>
           </div>
           <div>
             <h1 className="text-lg font-bold text-foreground">Bizzy</h1>
@@ -99,7 +98,6 @@ export function Sidebar() {
           </h3>
           <div className="space-y-1">
             {navigationItems.map((item) => {
-              const Icon = item.icon;
               const isActive = location.pathname === item.href;
               
               return (
@@ -114,7 +112,7 @@ export function Sidebar() {
                   )}
                 >
                   <div className="flex items-center gap-3">
-                    <Icon className="w-4 h-4" />
+                    <span className="text-base">{item.emoji}</span>
                     <span>{item.name}</span>
                   </div>
                   {item.badge && (
@@ -135,7 +133,6 @@ export function Sidebar() {
           </h3>
           <div className="space-y-3">
             {moduleItems.map((item) => {
-              const Icon = item.icon;
               const isActive = location.pathname === item.href;
               
               return (
@@ -154,7 +151,7 @@ export function Sidebar() {
                       "w-6 h-6 rounded flex items-center justify-center",
                       `bg-${item.color} text-white`
                     )}>
-                      <Icon className="w-3 h-3" />
+                      <span className="text-sm">{item.emoji}</span>
                     </div>
                     <span className="font-medium text-sm">{item.name}</span>
                   </div>
@@ -178,7 +175,7 @@ export function Sidebar() {
                 : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
             )}
           >
-            <settingsItem.icon className="w-4 h-4" />
+            <span className="text-base">{settingsItem.emoji}</span>
             <span>{settingsItem.name}</span>
           </NavLink>
         </div>
