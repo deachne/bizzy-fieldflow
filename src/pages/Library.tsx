@@ -9,6 +9,19 @@ import { Separator } from "@/components/ui/separator";
 const libraryItems = [
   {
     id: "LIB-001",
+    title: "Plant Analysis Report - Durum Wheat",
+    type: "PDF",
+    description: "A&L Canada Laboratories plant tissue analysis for Durum Wheat Seed. Contains nitrogen, phosphorus, potassium, and micronutrient levels with deficiency ratings.",
+    tags: ["soil-health", "analysis", "fertility", "laboratory"],
+    linkedEntities: ["BizzyFarmer", "Soil Tests"],
+    dateAdded: "Feb 16, 2024",
+    fileSize: "1.2 MB",
+    pages: 2,
+    thumbnail: "/thumbnails/plant-analysis-thumb.jpg",
+    file: "/documents/plant-analysis-report.pdf",
+  },
+  {
+    id: "LIB-002",
     title: "Combine #2 Parts Manual",
     type: "PDF",
     description: "Complete parts catalog and maintenance procedures for Case IH Combine #2. Contains part FH-BELT-7G-8821 specifications.",
@@ -20,7 +33,7 @@ const libraryItems = [
     thumbnail: "📋",
   },
   {
-    id: "LIB-002", 
+    id: "LIB-003", 
     title: "Agronomy Guidebook 2025",
     type: "PDF",
     description: "Comprehensive guide covering fertility management, regenerative practices, and soil health optimization.",
@@ -32,7 +45,7 @@ const libraryItems = [
     thumbnail: "🌱",
   },
   {
-    id: "LIB-003",
+    id: "LIB-004",
     title: "Managing Soil Organic Matter",
     type: "eBook",
     description: "Essential strategies for building and maintaining soil organic matter in agricultural systems.",
@@ -44,7 +57,7 @@ const libraryItems = [
     thumbnail: "📖",
   },
   {
-    id: "LIB-004",
+    id: "LIB-005",
     title: "Canola Market Analysis 2024",
     type: "PDF",
     description: "Comprehensive market report covering pricing trends, global demand, and seasonal patterns.",
@@ -56,7 +69,7 @@ const libraryItems = [
     thumbnail: "📊",
   },
   {
-    id: "LIB-005",
+    id: "LIB-006",
     title: "Equipment Safety Protocols",
     type: "Manual",
     description: "Safety procedures and emergency protocols for all farm equipment operations.",
@@ -70,7 +83,7 @@ const libraryItems = [
 ];
 
 const typeFilters = ["All", "PDF", "eBook", "Manual", "Guide"];
-const tagFilters = ["All", "equipment", "soil", "market", "safety", "fertility", "maintenance"];
+const tagFilters = ["All", "equipment", "soil", "market", "safety", "fertility", "maintenance", "analysis", "laboratory", "soil-health"];
 
 export default function Library() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -169,8 +182,16 @@ export default function Library() {
                 <CardContent className="p-4">
                   <div className="flex items-start gap-4">
                     {/* Thumbnail */}
-                    <div className="w-16 h-20 bg-library-light rounded-lg flex items-center justify-center text-2xl">
-                      {item.thumbnail}
+                    <div className="w-16 h-20 bg-library-light rounded-lg flex items-center justify-center text-2xl overflow-hidden">
+                      {item.thumbnail.startsWith('/') ? (
+                        <img 
+                          src={item.thumbnail} 
+                          alt={item.title}
+                          className="w-full h-full object-cover"
+                        />
+                      ) : (
+                        <span>{item.thumbnail}</span>
+                      )}
                     </div>
 
                     {/* Content */}
@@ -236,8 +257,16 @@ export default function Library() {
           <div className="p-6 space-y-6">
             {/* Header */}
             <div className="text-center">
-              <div className="w-20 h-24 bg-library-light rounded-lg flex items-center justify-center text-3xl mx-auto mb-4">
-                {selectedItem.thumbnail}
+              <div className="w-20 h-24 bg-library-light rounded-lg flex items-center justify-center text-3xl mx-auto mb-4 overflow-hidden">
+                {selectedItem.thumbnail.startsWith('/') ? (
+                  <img 
+                    src={selectedItem.thumbnail} 
+                    alt={selectedItem.title}
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <span>{selectedItem.thumbnail}</span>
+                )}
               </div>
               <h3 className="font-semibold text-lg mb-1">{selectedItem.title}</h3>
               <Badge variant="outline">{selectedItem.id}</Badge>
@@ -300,11 +329,27 @@ export default function Library() {
 
             {/* Actions */}
             <div className="space-y-2">
-              <Button className="w-full bg-gradient-primary">
+              <Button 
+                className="w-full bg-gradient-primary"
+                onClick={() => selectedItem.file && window.open(selectedItem.file, '_blank')}
+                disabled={!selectedItem.file}
+              >
                 <ExternalLink className="w-4 h-4 mr-2" />
                 Open Document
               </Button>
-              <Button variant="outline" className="w-full">
+              <Button 
+                variant="outline" 
+                className="w-full"
+                onClick={() => {
+                  if (selectedItem.file) {
+                    const link = document.createElement('a');
+                    link.href = selectedItem.file;
+                    link.download = selectedItem.title;
+                    link.click();
+                  }
+                }}
+                disabled={!selectedItem.file}
+              >
                 <Download className="w-4 h-4 mr-2" />
                 Download
               </Button>
