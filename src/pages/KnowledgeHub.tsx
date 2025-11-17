@@ -17,6 +17,7 @@ const defaultKnowledgeItems = [
     date: "Oct 15, 2024",
     module: "Hub",
     icon: FileText,
+    emoji: "🐍",
   },
   {
     id: 2,
@@ -27,6 +28,7 @@ const defaultKnowledgeItems = [
     date: "Oct 12, 2024",
     module: "Farmer",
     icon: FileText,
+    emoji: "🌱",
   },
   {
     id: 3,
@@ -37,6 +39,7 @@ const defaultKnowledgeItems = [
     date: "Oct 14, 2024",
     module: "Library",
     icon: Globe,
+    emoji: "🌍",
   },
   {
     id: 4,
@@ -47,6 +50,7 @@ const defaultKnowledgeItems = [
     date: "Oct 13, 2024", 
     module: "Farmer",
     icon: Image,
+    emoji: "📸",
   },
   {
     id: 5,
@@ -57,6 +61,7 @@ const defaultKnowledgeItems = [
     date: "Oct 16, 2024",
     module: "Farmer", 
     icon: Mic,
+    emoji: "🎤",
   },
   {
     id: 6,
@@ -67,6 +72,7 @@ const defaultKnowledgeItems = [
     date: "Sep 28, 2024",
     module: "Library",
     icon: BookOpen,
+    emoji: "📚",
   },
   {
     id: 7,
@@ -77,6 +83,7 @@ const defaultKnowledgeItems = [
     date: "Nov 17, 2024",
     module: "Library",
     icon: BookOpen,
+    emoji: "🧪",
   },
 ];
 
@@ -102,7 +109,8 @@ export default function KnowledgeHub() {
         if (!mergedItems.find(existing => existing.id === item.id)) {
           mergedItems.push({
             ...item,
-            icon: item.type === 'task' ? CheckSquare : FileText
+            icon: item.type === 'task' ? CheckSquare : FileText,
+            emoji: item.emoji || (item.type === 'task' ? '✅' : '📄')
           });
         }
       });
@@ -310,14 +318,13 @@ export default function KnowledgeHub() {
           : "space-y-3"
         }>
           {filteredItems.map((item) => {
-            const Icon = item.icon;
             return (
               <Card key={item.id} className="shadow-soft hover:shadow-medium transition-all cursor-pointer">
                 <CardHeader className="pb-3">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
-                      <div className={`w-8 h-8 rounded-lg bg-${getModuleColor(item.module)} flex items-center justify-center`}>
-                        <Icon className="w-4 h-4 text-white" />
+                      <div className={`w-10 h-10 rounded-lg bg-${getModuleColor(item.module)} flex items-center justify-center text-2xl`}>
+                        {item.emoji || "📄"}
                       </div>
                       <div>
                         <CardTitle className="text-base font-semibold">{item.title}</CardTitle>
